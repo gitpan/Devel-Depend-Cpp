@@ -5,6 +5,7 @@ use 5.006;
 use strict ;
 use warnings ;
 use Carp ;
+use Tie::IxHash ;
 
 require Exporter;
 
@@ -14,19 +15,20 @@ our %EXPORT_TAGS = ( 'all' => [ qw() ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw();
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 #------------------------------------------------------------------------------------------------
 
 sub Depend
 {
+my $cpp                     = shift || 'cpp' ;
 my $file_to_depend          = shift || confess "No file to depend!\n" ;
 my $switches                = shift ;
 my $include_system_includes = shift ;
 my $add_child_callback      = shift ;
 my $display_cpp_output      = shift ;
 
-my $command = "cpp -H -M $switches $file_to_depend 2>&1" ;
+my $command = "$cpp -H -M $switches $file_to_depend 2>&1" ;
 my $errors ;
 
 my @cpp_output = `$command` ;
@@ -54,8 +56,8 @@ Default search path from cpp Info pages:
 	@cpp_output = grep {! m~\.+\s+/usr/~ && /^\./} @cpp_output ;
 	}
 	
-my %nodes ;
 my %node_levels ;
+my %nodes ;
 my %parent_at_level = (0 => {__NAME => $file_to_depend}) ;
 
 for(@cpp_output)
@@ -67,15 +69,12 @@ for(@cpp_output)
 	$level = length $level ;
 	
 	my $node ;
-	if(exists $nodes{$name})
-		{
-		$node = $nodes{$name} ;
-		}
-	else
+	unless (exists $nodes{$name})
 		{
 		$nodes{$name} = {__NAME => $name} ;
-		$node = $nodes{$name} ;
 		}
+		
+	$node = $nodes{$name} ;
 		
 	$node_levels{$level}{$name} = $node unless exists $node_levels{$level}{$name} ;
 	
@@ -90,7 +89,7 @@ for(@cpp_output)
 		}
 	}
 	
-return((! defined $errors), \%node_levels, \%nodes, $errors) ;
+return((! defined $errors), \%node_levels, \%nodes, $parent_at_level{0}, $errors) ;
 }
 
 #-------------------------------------------------------------------------------
@@ -100,7 +99,7 @@ return((! defined $errors), \%node_levels, \%nodes, $errors) ;
 
 =head1 NAME
 
-Devel::Depend::Cpp - Perl extension for extracting dependency trees using 'cpp'
+Devel::Depend::Cpp - Perl extension for extracting dependency trees from c files
 
 =head1 SYNOPSIS
 
@@ -108,7 +107,8 @@ Devel::Depend::Cpp - Perl extension for extracting dependency trees using 'cpp'
   
  my ($success, $includ_levels, $included_files) = Devel::Depend::Cpp::Depend
  							(
- 							  '/usr/include/stdio.h'
+ 							  undef
+ 							, '/usr/include/stdio.h'
  							, '' # switches to cpp
  							, 0 # include system includes
  							) ;
@@ -122,7 +122,7 @@ I<Depend> returns a list consiting of the following items:
 
 =item [1] Success flag set to 1
 
-=item [2] A reference to a hash where the included files are sorted per level. (A file can appear at different levels)
+=item [2] A reference to a hash where the included files are sorted perl level. A file can appear simulteanously at different levels
 
 =item [3] A reference to a hash representing an include tree
 
@@ -143,15 +143,17 @@ I<Depend> takes the following arguments:
 
 =over 2
 
-=item 1/ The name of the file to depend
+=item 1/ the name of the 'cpp' binary to use. undef to use the first 'cpp' in your path
 
-=item 2/ A string to be passed to cpp, ex: '-DDEBUG'
+=item 2/ The name of the file to depend
 
-=item 3/ A boolean indicating if the system include files should be included in the result (anything under /usr/)
+=item 3/ A string to be passed to cpp, ex: '-DDEBUG'
 
-=item 4/ a sub reference to be called everytime a node is added (see I<depender.pl> for an example)
+=item 4/ A boolean indicating if the system include files should be included in the result (anything under /usr/)
 
-=item 5/ A boolean indicating if the output of B<cpp> should be dumped on screen
+=item 5/ a sub reference to be called everytime a node is added (see I<depender.pl> for an example)
+
+=item 6/ A boolean indicating if the output of B<cpp> should be dumped on screen
 
 =back
 
@@ -161,10 +163,7 @@ None .
 
 =head1 DEPENDENCIES
 
-B<cpp> must be in your execution path.
-
-I<depender.pl> depends on B<Data::TreeDumper> to dump the dependency tree and B<PBS> if a graph is to
-be generated.
+B<cpp>.
 
 =head1 AUTHOR
 
@@ -172,7 +171,7 @@ Nadim ibn Hamouda el Khemir <nadim@khemir.net>
 
 =head1 SEE ALSO
 
-B<PBS>: the Perl Build System from which B<Devel::Depend::Cpp> was extracted. Contact the author
-for more information about B<PBS>.
+B<PBS>.
 
 =cut
+

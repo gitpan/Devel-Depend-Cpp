@@ -6,6 +6,7 @@ use warnings ;
 use Carp ;
 
 use Devel::Depend::Cpp ;
+use Data::TreeDumper ;
 
 #------------------------------------------------------------------------------------------------
 
@@ -56,8 +57,9 @@ FrontEnd
 	  $file_to_depend
 	, $switches
 	, 1 # include system includes
-	, 1 # display_levels
 	, 1 # display_nodes
+	, 1 # display_levels
+	, 1 # display_tree
 	, 0 # disply cpp output
 	, 0 # generate_graph_through_pbs
 	, 0 # display_pbsfile
@@ -70,8 +72,9 @@ sub FrontEnd
 my $file_to_depend             = shift ;
 my $switches                   = shift ;
 my $include_system_includes    = shift ;
-my $display_levels             = shift ;
 my $display_nodes              = shift ;
+my $display_levels             = shift ;
+my $display_tree               = shift ;
 my $display_cpp_output         = shift ;
 my $generate_graph_through_pbs = shift ;
 my $display_pbsfile            = shift ;
@@ -83,48 +86,61 @@ my $sub = sub
 	$pbsfile .= "AddRule '$parent<$child', ['$parent' => '$child'], BuildOk() ;\n" ;
 	} ;
 
-my ($depend_ok, $levels, $nodes, $errors) = Devel::Depend::Cpp::Depend($file_to_depend, $switches, $include_system_includes, $sub, $display_cpp_output) ;
+my ($depend_ok, $levels, $nodes, $tree, $errors) = Devel::Depend::Cpp::Depend(undef, $file_to_depend, $switches, $include_system_includes, $sub, $display_cpp_output) ;
 
 if($depend_ok)
 	{
-	if($display_levels || $display_nodes)
+	my $GetDependenciesOnly = sub
+				{
+				my $tree = shift ;
+				
+				return( 'HASH', undef, sort grep {! /^__/} keys %$tree) if('HASH' eq ref $tree) ;
+				return (Data::TreeDumper::DefaultNodesToDisplay($tree)) ;
+				} ;
+	
+	if($display_nodes)
 		{
-		use Data::TreeDumper ;
-		my $GetDependenciesOnly = sub
-					{
-					my $tree = shift ;
-					
-					return( 'HASH', undef, sort grep {! /^__/} keys %$tree) if('HASH' eq ref $tree) ;
-					return (Data::TreeDumper::DefaultNodesToDisplay($tree)) ;
-					} ;
+		print STDERR DumpTree
+				(
+				$nodes
+				, "'$file_to_depend' included files"
+				, USE_ASCII       => 0
+				, FILTER          => $GetDependenciesOnly
+				, MAX_DEPTH       => 1
+				, DISPLAY_ADDRESS => 0
+				) ;
+				
+		print "\n" ;
+		}
 		
-		if($display_levels)
-			{
-			print STDERR DumpTree
-					(
-					$levels
-					, "include levels for '$file_to_depend':"
-					, USE_ASCII => 0
-					, FILTER => $GetDependenciesOnly
-					, MAX_DEPTH => 2
-					) ;
-					
-			print "\n" ;
-			}
-			
-		if($display_nodes)
-			{
-			print STDERR DumpTree
-					(
-					$nodes
-					, "'$file_to_depend' included tree:"
-					, USE_ASCII => 0
-					, FILTER => $GetDependenciesOnly
-					, MAX_DEPTH => -1
-					) ;
-			}
-			
-		print STDERR "\n" ;
+	if($display_levels)
+		{
+		print STDERR DumpTree
+				(
+				$levels
+				, "include levels for '$file_to_depend'"
+				, USE_ASCII       => 0
+				, FILTER          => $GetDependenciesOnly
+				, MAX_DEPTH       => 2
+				, DISPLAY_ADDRESS => 0
+				) ;
+				
+		print "\n" ;
+		}
+		
+	if($display_tree)
+		{
+		print STDERR DumpTree
+				(
+				$tree
+				, "'$file_to_depend' included files tree"
+				, USE_ASCII       => 0
+				, FILTER          => $GetDependenciesOnly
+				, MAX_DEPTH       => -1
+				, DISPLAY_ADDRESS => 0
+				) ;
+				
+		print "\n" ;
 		}
 		
 	print $pbsfile if ($display_pbsfile) ;

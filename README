@@ -1,9 +1,13 @@
-Devel/Depend/Cpp version 0.01
+Devel/Depend/Cpp version 0.02
 =============================
 
 Perl extension for extracting dependency trees from c files using 'cpp'.
 
 INSTALLATION
+
+Changes in this version:
+	Changed the interface to the Depend sub.
+
 
 To install this module type the following:
 
@@ -18,7 +22,7 @@ This module requires these other modules and libraries:
 
 None for using 'Depend'.
 
-Data::TreeDumper and/or PBS for using the example script 'depender.pl'.
+Data::TreeDumper and/or PBS for using the example script 'depend.pl'.
 
 COPYRIGHT AND LICENCE
 
