@@ -1,0 +1,19 @@
+Revision history for Perl extension Devel::Depend::Cpp.
+
+0.01  Fri Oct  3 16:52:24 2003
+	- original version; created by h2xs 1.21 with options
+		-AX -n Devel::Depend::Cpp
+		
+0.02  Mon Nov 10 11:00:00 2003
+	ADDED: possibility to everride which 'cpp' is used (ex: arm-elf-cpp)
+	CHANGED: the returned list
+	
+0.03  Tue Feb 1 19:00:00 2005
+	FIXED: Ignore cpp output to STDOUT
+	
+
+0.04  Tue Feb 1 20:00:00 2005
+	FIXED: do not consider empty output as an error
+
+0.05  Wed Jun 23 23:50:00 2005
+	ADDED: PreprocessorDepend alias
