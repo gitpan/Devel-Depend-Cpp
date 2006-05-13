@@ -1,8 +1,7 @@
 #!/usr/bin/perl
 
-use strict ;
-use strict ;
 use warnings ;
+use strict ;
 use Carp ;
 
 use Devel::Depend::Cpp ;
@@ -104,7 +103,7 @@ if($depend_ok)
 				(
 				$nodes
 				, "'$file_to_depend' included files"
-				, USE_ASCII       => 0
+				, USE_ASCII       => 1
 				, FILTER          => $GetDependenciesOnly
 				, MAX_DEPTH       => 1
 				, DISPLAY_ADDRESS => 0
@@ -119,7 +118,7 @@ if($depend_ok)
 				(
 				$levels
 				, "include levels for '$file_to_depend'"
-				, USE_ASCII       => 0
+				, USE_ASCII       => 1
 				, FILTER          => $GetDependenciesOnly
 				, MAX_DEPTH       => 2
 				, DISPLAY_ADDRESS => 0
@@ -134,7 +133,7 @@ if($depend_ok)
 				(
 				$tree
 				, "'$file_to_depend' included files tree"
-				, USE_ASCII       => 0
+				, USE_ASCII       => 1
 				, FILTER          => $GetDependenciesOnly
 				, MAX_DEPTH       => -1
 				, DISPLAY_ADDRESS => 0
