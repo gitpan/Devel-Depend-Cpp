@@ -1,5 +1,8 @@
 Revision history for Perl extension Devel::Depend::Cpp.
 
+0.09  Sat Jul 26 2008
+	CHANGED: moved depender.pl to script directory to ease rpm generation (thx rindolf)
+
 0.08  Sun Mar 19 2006
 	CHANGED: export $PreprocessorDepend instead for using globs, this is a synch for pbs 0.40
 	CAHNGED: Documentation to reflect latest changes and made the documentation more attractive
