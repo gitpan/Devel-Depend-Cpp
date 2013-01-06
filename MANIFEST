@@ -7,3 +7,4 @@ script/depender.pl
 test.pl
 tree.png
 META.yml                                 Module meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)

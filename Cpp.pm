@@ -13,7 +13,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw() ] );
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw($PreprocessorDepend);
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 =head1 NAME
 
@@ -232,7 +232,7 @@ Default search path from cpp Info pages:
 =cut
 	@cpp_output = grep {! m~\.+\s+/usr/~ && /^\./} @cpp_output ;
 
-	if ($^O eq 'MSWin32')
+	if ($^O eq 'MSWin32' && defined $ENV{INCLUDE})
 		{
 		my @includes = split(';', $ENV{INCLUDE});
 		for my $include (@includes)
